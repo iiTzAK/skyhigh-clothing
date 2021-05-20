@@ -1,6 +1,6 @@
 import firebase from "firebase/app";
-import 'firebase/firestore';
-import 'firebase/auth';
+import "firebase/firestore";
+import "firebase/auth";
 
 const config = {
   apiKey: "AIzaSyCO2zp0NQlRALuFTif8zGCKR3S-TdDCZ5E",
@@ -9,9 +9,8 @@ const config = {
   storageBucket: "crwn-db-7dd89.appspot.com",
   messagingSenderId: "580023710799",
   appId: "1:580023710799:web:cc9f24e98c93528dcc263a",
-  measurementId: "G-NJVWY4BBMM"
+  measurementId: "G-NJVWY4BBMM",
 };
-
 
 export const createUserProfileDocument = async (userAuth, additionalData) => {
   if (!userAuth) return;
@@ -28,10 +27,10 @@ export const createUserProfileDocument = async (userAuth, additionalData) => {
         displayName,
         email,
         createdAt,
-        ...additionalData
-      })
+        ...additionalData,
+      });
     } catch (error) {
-      console.log('error creating user', error.message);
+      console.log("error creating user", error.message);
     }
   }
 
@@ -40,11 +39,14 @@ export const createUserProfileDocument = async (userAuth, additionalData) => {
 
 firebase.initializeApp(config);
 
-export const addCollectionAndDocuments = async (collectionKey, objectsToAdd) => {
+export const addCollectionAndDocuments = async (
+  collectionKey,
+  objectsToAdd
+) => {
   const collectionRef = firestore.collection(collectionKey);
 
   const batch = firestore.batch();
-  objectsToAdd.forEach(obj => {
+  objectsToAdd.forEach((obj) => {
     const newDocRef = collectionRef.doc();
     batch.set(newDocRef, obj);
   });
@@ -52,15 +54,15 @@ export const addCollectionAndDocuments = async (collectionKey, objectsToAdd) => 
   return await batch.commit();
 };
 
-export const convertCollectionsSnapshotToMap = collectionsSnapshot => {
-  const transformedCollection = collectionsSnapshot.docs.map(docSnapshot => {
+export const convertCollectionsSnapshotToMap = (collectionsSnapshot) => {
+  const transformedCollection = collectionsSnapshot.docs.map((docSnapshot) => {
     const { title, items } = docSnapshot.data();
 
     return {
       routeName: encodeURI(title.toLowerCase()),
       id: docSnapshot.id,
       title,
-      items
+      items,
     };
   });
 
@@ -70,11 +72,20 @@ export const convertCollectionsSnapshotToMap = collectionsSnapshot => {
   }, {});
 };
 
+export const getCurrentUser = () => {
+  return new Promise((resolve, reject) => {
+    const unsubscribe = auth.onAuthStateChanged((userAuth) => {
+      unsubscribe();
+      resolve(userAuth);
+    }, reject);
+  });
+};
+
 export const auth = firebase.auth();
 export const firestore = firebase.firestore();
 
-const provider = new firebase.auth.GoogleAuthProvider();
-provider.setCustomParameters({ prompt: 'select_account' });
-export const signInWithGoogle = () => auth.signInWithPopup(provider);
+export const googleProvider = new firebase.auth.GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: "select_account" });
+export const signInWithGoogle = () => auth.signInWithPopup(googleProvider);
 
 export default firebase;
